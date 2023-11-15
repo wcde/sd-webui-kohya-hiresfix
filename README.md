@@ -5,4 +5,4 @@
 #### Scale - slightly increases quality at cost of VRAM
 
 ## Source:
-https://gist.github.com/laksjdjf/487a28ceda7f0853094933d2e138e3c6
+https://gist.github.com/kohya-ss/3f774da220df102548093a7abc8538ed
