@@ -57,7 +57,7 @@ class KohyaHiresFix(scripts.Script):
         model = p.sd_model.model.diffusion_model
         if s1 > s2: s2 = s1
         self.p1 = (s1, d1)
-        self.p2 = (s1, d2)
+        self.p2 = (s2, d2)
         self.downscale = downscale
         self.upscale = upscale
         self.early_out = early_out
