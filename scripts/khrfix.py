@@ -37,8 +37,8 @@ class KohyaHiresFix(scripts.Script):
                 s2 = gr.Slider(minimum=0, maximum=16, step=1, label="Stop step", value=5)
                 d2 = gr.Slider(minimum=2, maximum=10, step=1, label="Depth", value=4)
             with gr.Row():
-                scale = gr.Slider(minimum=1.0, maximum=4.0, step=0.1, label="Scale", value=2.0)
-                early_out = gr.Checkbox(label="Upsample to native resolution early", value=True)
+                scale = gr.Slider(minimum=1.0, maximum=4.0, step=0.1, label="Upsampling scale", value=2.0)
+                early_out = gr.Checkbox(label="Early upsampling (affects performance/quality)", value=True)
         
         ui = [enable, d1, d2, s1, s2, scale, early_out]
         for elem in ui:
