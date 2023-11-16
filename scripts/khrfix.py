@@ -19,6 +19,7 @@ class Scaler(torch.nn.Module):
 class KohyaHiresFix(scripts.Script):
     def __init__(self):
         super().__init__()
+        self.disable = False
 
     def title(self):
         return "Kohya Hires.fix"
@@ -30,11 +31,11 @@ class KohyaHiresFix(scripts.Script):
         with gr.Accordion(label='Kohya Hires.fix', open=False):
             enable = gr.Checkbox(label='Enable extension', value=False)
             with gr.Row():
-                s1 = gr.Slider(minimum=0, maximum=12, step=1, label="Stop step", value=3)
-                d1 = gr.Slider(minimum=2, maximum=4, step=1, label="Depth", value=3)
+                s1 = gr.Slider(minimum=0, maximum=12, step=1, label="Stop step", value=2)
+                d1 = gr.Slider(minimum=2, maximum=10, step=1, label="Depth", value=3)
             with gr.Row():
-                s2 = gr.Slider(minimum=0, maximum=16, step=1, label="Stop step", value=7)
-                d2 = gr.Slider(minimum=2, maximum=6, step=1, label="Depth", value=4)
+                s2 = gr.Slider(minimum=0, maximum=16, step=1, label="Stop step", value=5)
+                d2 = gr.Slider(minimum=2, maximum=10, step=1, label="Depth", value=4)
             scale = gr.Slider(minimum=1.0, maximum=4.0, step=0.1, label="Scale", value=2.0)
         
         ui = [enable, d1, d2, s1, s2, scale]
@@ -44,7 +45,7 @@ class KohyaHiresFix(scripts.Script):
     
 
     def process(self, p, enable, d1, d2, s1, s2, scale):
-        if not enable:
+        if not enable or self.disable:
             script_callbacks.remove_current_script_callbacks()
             return
         model = p.sd_model.model.diffusion_model
@@ -58,11 +59,11 @@ class KohyaHiresFix(scripts.Script):
                 if params.sampling_step < s:
                     if not isinstance(model.input_blocks[d], Scaler):
                         model.input_blocks[d] = Scaler(0.5, model.input_blocks[d])
-                        model.output_blocks[d] = Scaler(self.scale, model.output_blocks[d])
+                        model.output_blocks[-d] = Scaler(self.scale, model.output_blocks[-d])
                     return
                 elif isinstance(model.input_blocks[d], Scaler) and (self.p1[1] != self.p2[1] or s == self.p2[0]):
                     model.input_blocks[d] = model.input_blocks[d].block
-                    model.output_blocks[d] = model.output_blocks[d].block
+                    model.output_blocks[-d] = model.output_blocks[-d].block
                 
         script_callbacks.on_cfg_denoiser(denoiser_callback)
         
@@ -72,4 +73,4 @@ class KohyaHiresFix(scripts.Script):
                 p.sd_model.model.diffusion_model.input_blocks[i] = b.block
         for i, b in enumerate(p.sd_model.model.diffusion_model.output_blocks):
             if isinstance(b, Scaler):
-                p.sd_model.model.diffusion_model.output_blocks[i] = b.block
+                p.sd_model.model.diffusion_model.output_blocks[-i] = b.block
