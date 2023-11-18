@@ -52,7 +52,7 @@ class KohyaHiresFix(scripts.Script):
                 downscale = gr.Slider(minimum=0.1, maximum=1.0, step=0.05, label="Downsampling scale", 
                                       value=self.config.get('downscale', 0.5))
                 upscale = gr.Slider(minimum=1.0, maximum=4.0, step=0.1, label="Upsampling scale", 
-                                    value=self.config.get('upscale', 4.0))
+                                    value=self.config.get('upscale', 2.0))
             with gr.Row():
                 smooth_scaling = gr.Checkbox(label="Smooth scaling", value=self.config.get('smooth_scaling', True))
                 early_out = gr.Checkbox(label="Early upsampling", value=self.config.get('early_out', False))
@@ -93,7 +93,7 @@ class KohyaHiresFix(scripts.Script):
                 elif isinstance(model.input_blocks[d], Scaler) and (self.p1[1] != self.p2[1] or s == self.p2[0]):
                     model.input_blocks[d] = model.input_blocks[d].block
                     model.output_blocks[out_d] = model.output_blocks[out_d].block
-            self.config.step_limit = params.sampling_step if self.config.only_one_pass else 0
+            self.step_limit = params.sampling_step if self.config.only_one_pass else 0
         
         script_callbacks.on_cfg_denoiser(denoiser_callback)
         
