@@ -75,8 +75,14 @@ class KohyaHiresFix(scripts.Script):
         self.p1 = (s1, d1 - 1)
         self.p2 = (s2, d2 - 1)
         self.step_limit = 0
+        self.image_step = 0
+        self.steps_per_image = p.steps + p.hr_second_pass_steps
         
         def denoiser_callback(params: script_callbacks.CFGDenoiserParams):
+            if self.image_step == self.steps_per_image:
+                self.step_limit = self.image_step = 0
+
+            self.image_step += 1
             if params.sampling_step < self.step_limit: return
             for s, d in [self.p1, self.p2]:
                 out_d = d if self.config.early_out else -(d + 1)
@@ -94,7 +100,8 @@ class KohyaHiresFix(scripts.Script):
                     model.input_blocks[d] = model.input_blocks[d].block
                     model.output_blocks[out_d] = model.output_blocks[out_d].block
             self.step_limit = params.sampling_step if self.config.only_one_pass else 0
-        
+
+        script_callbacks.remove_current_script_callbacks()
         script_callbacks.on_cfg_denoiser(denoiser_callback)
         
     def postprocess(self, p, processed, *args):
