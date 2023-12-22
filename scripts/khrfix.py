@@ -24,9 +24,10 @@ class Scaler(torch.nn.Module):
 class KohyaHiresFix(scripts.Script):
     def __init__(self):
         super().__init__()
-        if not CONFIG_PATH.exists():
-            open(CONFIG_PATH, 'w').close()
-        self.config: DictConfig = OmegaConf.load(CONFIG_PATH)
+        try:
+            self.config: DictConfig = OmegaConf.load(CONFIG_PATH)
+        except Exception:
+            self.config = DictConfig({})
         self.disable = False
         self.step_limit = 0
 
@@ -63,7 +64,6 @@ class KohyaHiresFix(scripts.Script):
         for elem in ui:
             setattr(elem, "do_not_save_to_config", True)
         return ui
-    
 
     def process(self, p, enable, only_one_pass, d1, d2, s1, s2, scaler, downscale, upscale, smooth_scaling, early_out):
         self.config = DictConfig({name: var for name, var in locals().items() if name not in ['self', 'p']})
