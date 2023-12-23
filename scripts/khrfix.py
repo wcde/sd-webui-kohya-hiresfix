@@ -30,6 +30,7 @@ class KohyaHiresFix(scripts.Script):
             self.config = DictConfig({})
         self.disable = False
         self.step_limit = 0
+        self.infotext_fields = []
 
     def title(self):
         return "Kohya Hires.fix"
@@ -63,6 +64,24 @@ class KohyaHiresFix(scripts.Script):
         ui = [enable, only_one_pass, d1, d2, s1, s2, scaler, downscale, upscale, smooth_scaling, early_out]
         for elem in ui:
             setattr(elem, "do_not_save_to_config", True)
+
+        parameters = {
+            'DSHF_s1': s1,
+            'DSHF_d1': d1,
+            'DSHF_s2': s2,
+            'DSHF_d2': d2,
+            'DSHF_scaler': scaler,
+            'DSHF_down': downscale,
+            'DSHF_up': upscale,
+            'DSHF_smooth': smooth_scaling,
+            'DSHF_early': early_out,
+            'DSHF_one': only_one_pass,
+        }
+        # using "DSHF_s1" as key to check if extension is enabled
+        self.infotext_fields.append((enable, lambda d: d.get('DSHF_s1', False)))
+        for k, element in parameters.items():
+            self.infotext_fields.append((element, k))
+
         return ui
 
     def process(self, p, enable, only_one_pass, d1, d2, s1, s2, scaler, downscale, upscale, smooth_scaling, early_out):
@@ -96,7 +115,22 @@ class KohyaHiresFix(scripts.Script):
             self.step_limit = params.sampling_step if self.config.only_one_pass else 0
 
         script_callbacks.on_cfg_denoiser(denoiser_callback)
-        
+
+        parameters = {
+            'DSHF_s1': s1,
+            'DSHF_d1': d1,
+            'DSHF_s2': s2,
+            'DSHF_d2': d2,
+            'DSHF_scaler': scaler,
+            'DSHF_down': downscale,
+            'DSHF_up': upscale,
+            'DSHF_smooth': smooth_scaling,
+            'DSHF_early': early_out,
+            'DSHF_one': only_one_pass,
+        }
+        for k, v in parameters.items():
+            p.extra_generation_params[k] = v
+
     def postprocess(self, p, processed, *args):
         for i, b in enumerate(p.sd_model.model.diffusion_model.input_blocks):
             if isinstance(b, Scaler):
